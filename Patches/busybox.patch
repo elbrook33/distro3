@@ -1,0 +1,261 @@
+diff -c -r busybox-1.24.1.old/e2fsprogs/fsck.c busybox-1.24.1.new/e2fsprogs/fsck.c
+*** busybox-1.24.1.old/e2fsprogs/fsck.c	2016-01-28 21:46:47.758543917 +1100
+--- busybox-1.24.1.new/e2fsprogs/fsck.c	2016-01-28 21:48:39.172471985 +1100
+***************
+*** 38,44 ****
+  //usage:       "[-ANPRTV] [-C FD] [-t FSTYPE] [FS_OPTS] [BLOCKDEV]..."
+  //usage:#define fsck_full_usage "\n\n"
+  //usage:       "Check and repair filesystems\n"
+! //usage:     "\n	-A	Walk /etc/fstab and check all filesystems"
+  //usage:     "\n	-N	Don't execute, just show what would be done"
+  //usage:     "\n	-P	With -A, check filesystems in parallel"
+  //usage:     "\n	-R	With -A, skip the root filesystem"
+--- 38,44 ----
+  //usage:       "[-ANPRTV] [-C FD] [-t FSTYPE] [FS_OPTS] [BLOCKDEV]..."
+  //usage:#define fsck_full_usage "\n\n"
+  //usage:       "Check and repair filesystems\n"
+! //usage:     "\n	-A	Walk /System/Settings/fstab and check all filesystems"
+  //usage:     "\n	-N	Don't execute, just show what would be done"
+  //usage:     "\n	-P	With -A, check filesystems in parallel"
+  //usage:     "\n	-R	With -A, skip the root filesystem"
+***************
+*** 311,317 ****
+  	return fs;
+  }
+  
+! /* Load the filesystem database from /etc/fstab */
+  static void load_fs_info(const char *filename)
+  {
+  	FILE *fstab;
+--- 311,317 ----
+  	return fs;
+  }
+  
+! /* Load the filesystem database from /System/Settings/fstab */
+  static void load_fs_info(const char *filename)
+  {
+  	FILE *fstab;
+***************
+*** 335,341 ****
+  	endmntent(fstab);
+  }
+  
+! /* Lookup filesys in /etc/fstab and return the corresponding entry. */
+  static struct fs_info *lookup(char *filesys)
+  {
+  	struct fs_info *fs;
+--- 335,341 ----
+  	endmntent(fstab);
+  }
+  
+! /* Lookup filesys in /System/Settings/fstab and return the corresponding entry. */
+  static struct fs_info *lookup(char *filesys)
+  {
+  	struct fs_info *fs;
+***************
+*** 577,586 ****
+   *
+   * If the type is specified using -t, and it isn't prefixed with "no"
+   * (as in "noext2") and only one filesystem type is specified, then
+!  * use that type regardless of what is specified in /etc/fstab.
+   *
+   * If the type isn't specified by the user, then use either the type
+!  * specified in /etc/fstab, or "auto".
+   */
+  static void fsck_device(struct fs_info *fs /*, int interactive */)
+  {
+--- 577,586 ----
+   *
+   * If the type is specified using -t, and it isn't prefixed with "no"
+   * (as in "noext2") and only one filesystem type is specified, then
+!  * use that type regardless of what is specified in /System/Settings/fstab.
+   *
+   * If the type isn't specified by the user, then use either the type
+!  * specified in /System/Settings/fstab, or "auto".
+   */
+  static void fsck_device(struct fs_info *fs /*, int interactive */)
+  {
+***************
+*** 744,750 ****
+  	return 0;
+  }
+  
+! /* Check all file systems, using the /etc/fstab table. */
+  static int check_all(void)
+  {
+  	struct fs_info *fs;
+--- 744,750 ----
+  	return 0;
+  }
+  
+! /* Check all file systems, using the /System/Settings/fstab table. */
+  static int check_all(void)
+  {
+  	struct fs_info *fs;
+***************
+*** 1059,1065 ****
+  	 * so we are scanning it anyway */
+  	fstab = getenv("FSTAB_FILE");
+  	if (!fstab)
+! 		fstab = "/etc/fstab";
+  	load_fs_info(fstab);
+  
+  	/*interactive = (num_devices == 1) | serialize;*/
+--- 1059,1065 ----
+  	 * so we are scanning it anyway */
+  	fstab = getenv("FSTAB_FILE");
+  	if (!fstab)
+! 		fstab = "/System/Settings/fstab";
+  	load_fs_info(fstab);
+  
+  	/*interactive = (num_devices == 1) | serialize;*/
+diff -c -r busybox-1.24.1.old/util-linux/mount.c busybox-1.24.1.new/util-linux/mount.c
+*** busybox-1.24.1.old/util-linux/mount.c	2016-01-28 21:46:47.650542102 +1100
+--- busybox-1.24.1.new/util-linux/mount.c	2016-01-28 21:48:39.416476313 +1100
+***************
+*** 12,18 ****
+  //
+  // mount_main() calls singlemount() which calls mount_it_now().
+  //
+! // mount_main() can loop through /etc/fstab for mount -a
+  // singlemount() can loop through /etc/filesystems for fstype detection.
+  // mount_it_now() does the actual mount.
+  //
+--- 12,18 ----
+  //
+  // mount_main() calls singlemount() which calls mount_it_now().
+  //
+! // mount_main() can loop through /System/Settings/fstab for mount -a
+  // singlemount() can loop through /etc/filesystems for fstype detection.
+  // mount_it_now() does the actual mount.
+  //
+***************
+*** 55,61 ****
+  //config:	  "obexfs -b00.11.22.33.44.55 /mnt"
+  //config:	  Also "mount -t sometype [-o opts] fs /mnt" will try
+  //config:	  "sometype [-o opts] fs /mnt" if simple mount syscall fails.
+! //config:	  The idea is to use such virtual filesystems in /etc/fstab.
+  //config:
+  //config:config FEATURE_MOUNT_LABEL
+  //config:	bool "Support specifying devices by label or UUID"
+--- 55,61 ----
+  //config:	  "obexfs -b00.11.22.33.44.55 /mnt"
+  //config:	  Also "mount -t sometype [-o opts] fs /mnt" will try
+  //config:	  "sometype [-o opts] fs /mnt" if simple mount syscall fails.
+! //config:	  The idea is to use such virtual filesystems in /System/Settings/fstab.
+  //config:
+  //config:config FEATURE_MOUNT_LABEL
+  //config:	bool "Support specifying devices by label or UUID"
+***************
+*** 100,109 ****
+  //config:
+  //config:config FEATURE_MOUNT_FSTAB
+  //config:	depends on MOUNT
+! //config:	bool "Support /etc/fstab and -a"
+  //config:	default y
+  //config:	help
+! //config:	  Support mount all and looking for files in /etc/fstab.
+  //config:
+  //config:config FEATURE_MOUNT_OTHERTAB
+  //config:	depends on FEATURE_MOUNT_FSTAB
+--- 100,109 ----
+  //config:
+  //config:config FEATURE_MOUNT_FSTAB
+  //config:	depends on MOUNT
+! //config:	bool "Support /System/Settings/fstab and -a"
+  //config:	default y
+  //config:	help
+! //config:	  Support mount all and looking for files in /System/Settings/fstab.
+  //config:
+  //config:config FEATURE_MOUNT_OTHERTAB
+  //config:	depends on FEATURE_MOUNT_FSTAB
+***************
+*** 139,145 ****
+  ////usage:     "\n	-w		Read-write mount (default)"
+  //usage:     "\n	-t FSTYPE[,...]	Filesystem type(s)"
+  //usage:	IF_FEATURE_MOUNT_OTHERTAB(
+! //usage:     "\n	-T FILE		Read FILE instead of /etc/fstab"
+  //usage:	)
+  //usage:     "\n	-O OPT		Mount only filesystems with option OPT (-a only)"
+  //usage:     "\n-o OPT:"
+--- 139,145 ----
+  ////usage:     "\n	-w		Read-write mount (default)"
+  //usage:     "\n	-t FSTYPE[,...]	Filesystem type(s)"
+  //usage:	IF_FEATURE_MOUNT_OTHERTAB(
+! //usage:     "\n	-T FILE		Read FILE instead of /System/Settings/fstab"
+  //usage:	)
+  //usage:     "\n	-O OPT		Mount only filesystems with option OPT (-a only)"
+  //usage:     "\n-o OPT:"
+***************
+*** 1897,1904 ****
+  		// It is safe ONLY because non-root
+  		// cannot use two-argument mount command
+  		// and using one-argument "mount 'sh#-c#sh'" doesn't work:
+! 		// "mount: can't find sh#-c#sh in /etc/fstab"
+! 		// (if /etc/fstab has it, it's ok: root sets up /etc/fstab).
+  
+  		s = mp->mnt_fsname;
+  		n = 0;
+--- 1897,1904 ----
+  		// It is safe ONLY because non-root
+  		// cannot use two-argument mount command
+  		// and using one-argument "mount 'sh#-c#sh'" doesn't work:
+! 		// "mount: can't find sh#-c#sh in /System/Settings/fstab"
+! 		// (if /System/Settings/fstab has it, it's ok: root sets up /System/Settings/fstab).
+  
+  		s = mp->mnt_fsname;
+  		n = 0;
+***************
+*** 2133,2139 ****
+  	char *O_optmatch = NULL;
+  	char *storage_path;
+  	llist_t *lst_o = NULL;
+! 	const char *fstabname = "/etc/fstab";
+  	FILE *fstab;
+  	int i, j;
+  	int rc = EXIT_SUCCESS;
+--- 2133,2139 ----
+  	char *O_optmatch = NULL;
+  	char *storage_path;
+  	llist_t *lst_o = NULL;
+! 	const char *fstabname = "/System/Settings/fstab";
+  	FILE *fstab;
+  	int i, j;
+  	int rc = EXIT_SUCCESS;
+***************
+*** 2230,2236 ****
+  
+  	// A malicious user could overmount /usr without this.
+  	if (ENABLE_FEATURE_MOUNT_OTHERTAB && nonroot)
+! 		fstabname = "/etc/fstab";
+  	// Open either fstab or mtab
+  	if (cmdopt_flags & MS_REMOUNT) {
+  		// WARNING. I am not sure this matches util-linux's
+--- 2230,2236 ----
+  
+  	// A malicious user could overmount /usr without this.
+  	if (ENABLE_FEATURE_MOUNT_OTHERTAB && nonroot)
+! 		fstabname = "/System/Settings/fstab";
+  	// Open either fstab or mtab
+  	if (cmdopt_flags & MS_REMOUNT) {
+  		// WARNING. I am not sure this matches util-linux's
+diff -c -r busybox-1.24.1.old/util-linux/swaponoff.c busybox-1.24.1.new/util-linux/swaponoff.c
+*** busybox-1.24.1.old/util-linux/swaponoff.c	2016-01-28 21:46:47.650542102 +1100
+--- busybox-1.24.1.new/util-linux/swaponoff.c	2016-01-28 21:48:39.364475390 +1100
+***************
+*** 179,185 ****
+  {
+  	struct mntent *m;
+  	int err = 0;
+! 	FILE *f = xfopen_for_read("/etc/fstab");
+  
+  	while ((m = getmntent(f)) != NULL) {
+  		if (strcmp(m->mnt_type, MNTTYPE_SWAP) == 0) {
+--- 179,185 ----
+  {
+  	struct mntent *m;
+  	int err = 0;
+! 	FILE *f = xfopen_for_read("/System/Settings/fstab");
+  
+  	while ((m = getmntent(f)) != NULL) {
+  		if (strcmp(m->mnt_type, MNTTYPE_SWAP) == 0) {
